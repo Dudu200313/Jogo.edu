@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+        }
+        
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+        
+        .cell:hover {
+            background-color: #f0f0f0;
+        }
+        
+        #resetButton {
+            padding: 5px;
+            font-size: 16px;
+            margin: 0 auto; /* Centralizar horizontalmente */
+            cursor: pointer;
+            display: flex;
+            justify-content: center; /* Centralizar dentro do contêiner flexível */
+        }
+        
+        .nome {
+            padding-left: 50px;
+            margin: 10px auto 0; /* Ajuste de margem para centralizar verticalmente */
+            text-align: center; /* Centralizar o texto dentro do contêiner */
+        }
+    </style>
+    <title>Jogo da Velha</title>
+
+    <!-- Use o caminho relativo para o cliente.js se estiver no mesmo diretório -->
+    <script src="cliente.js"></script>
+
+    <!-- Corrija o caminho para o socket.io.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const board = document.getElementById('board');
+            let currentPlayer = 'X';
+
+            // Cria as células do tabuleiro
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = i;
+                cell.addEventListener('click', handleCellClick);
+                board.appendChild(cell);
+            }
+
+            // Conecta-se ao servidor usando o IP fornecido
+            const socket = io('https://10.35.5.80:3000');
+
+            // Função chamada quando uma célula é clicada
+            function handleCellClick(event) {
+                const cell = event.target;
+                if (cell.textContent === '') {
+                    cell.textContent = currentPlayer;
+                    socket.emit('cellClick', cell.dataset.index); // Envie o índice da célula para o servidor
+                    currentPlayer = (currentPlayer === 'X') ? 'O' : 'X'; // Alterna entre 'X' e 'O'
+                }
+            }
+
+            // Adiciona um listener para o botão de reiniciar
+            const resetButton = document.createElement('button');
+            resetButton.textContent = 'Reiniciar';
+            resetButton.id = 'resetButton';
+            resetButton.addEventListener('click', resetGame);
+            document.body.appendChild(resetButton);
+
+            // Função para reiniciar o jogo
+            function resetGame() {
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                });
+                currentPlayer = 'X';
+            }
+
+            // Restante do seu código permanece inalterado...
+
+        });
+    </script>
+</head>
+<body>
+    <h1 class="nome">Jogo da Velha</h1>
+    <div id="board"></div>
+</body>
+</html>
